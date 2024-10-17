@@ -73,7 +73,7 @@ def a_star(grid, start, goal):
                     open_dict[(neighbor_x, neighbor_y)] = True  # Mark node in open list
 
         # Adding delay of 0.5 seconds between iterations
-        pygame.time.delay(100)  
+        pygame.time.delay(50)  
         visualize_search(open_dict, closed_dict)  # Visualize open and closed nodes
         draw_grid()
         draw_obstacles(grid)
@@ -136,13 +136,19 @@ def main():
         if not path_found:
             visualize_search(open_dict, closed_dict)
 
-        # When path is found, draw the path and move the character
-        if path and path_found:
-            draw_path(path[:current_step])
+        # When path is found, draw the path
+        if path and not path_found:
+            draw_path(path)
             pygame.draw.rect(screen, RED, (goal.y * TILE_SIZE, goal.x * TILE_SIZE, TILE_SIZE, TILE_SIZE))  # Goal
-            pygame.draw.rect(screen, BLUE, (path[current_step][1] * TILE_SIZE, path[current_step][0] * TILE_SIZE, TILE_SIZE, TILE_SIZE))  # Main character
 
-            if current_step < len(path) - 1:
+        # Start moving the character once the path is fully drawn
+        if path_found:
+            # Keep drawing the path while the character moves
+            draw_path(path)
+            pygame.draw.rect(screen, RED, (goal.y * TILE_SIZE, goal.x * TILE_SIZE, TILE_SIZE, TILE_SIZE))  # Goal
+            if current_step < len(path):
+                # Draw the character moving on the green path
+                pygame.draw.rect(screen, BLUE, (path[current_step][1] * TILE_SIZE, path[current_step][0] * TILE_SIZE, TILE_SIZE, TILE_SIZE))
                 current_step += 1
 
         for event in pygame.event.get():
@@ -151,10 +157,10 @@ def main():
 
         pygame.display.flip()
 
-        # Wait for a moment after visualizing the search, then start moving the character
+        # Wait for a moment after visualizing the search, then show the path
         if not path_found:
             pygame.time.wait(2000)  # Wait for 2 seconds after visualizing search
-            path_found = True  # Start the movement
+            path_found = True  # Show the path, then start the movement
         else:
             clock.tick(5)  # Speed of movement after path found
 
