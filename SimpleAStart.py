@@ -8,7 +8,7 @@ WIDTH, HEIGHT = 600, 600
 ROWS, COLS = 20, 20
 TILE_SIZE = WIDTH // COLS
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Jump Point Search Visualization")
+pygame.display.set_caption("A* Pathfinding Visualization Game")
 
 # Colors
 WHITE = (255, 255, 255)
@@ -36,55 +36,7 @@ class Node:
 def heuristic(node, goal):
     return abs(node.x - goal.x) + abs(node.y - goal.y)
 
-def jump(grid, node, parent, goal):
-    x, y = node.x, node.y
-    dx, dy = x - parent.x, y - parent.y
-
-    # Check if out of bounds or is an obstacle
-    if not (0 <= x < grid.shape[0] and 0 <= y < grid.shape[1]) or grid[x][y] == 1:
-        return None
-
-    # Goal found
-    if (x, y) == (goal.x, goal.y):
-        return node
-
-    # Horizontal/Vertical jumps
-    if dx != 0 and dy == 0:
-        if (0 <= x + dx < grid.shape[0] and 0 <= y - 1 < grid.shape[1] and grid[x + dx][y - 1] == 0) or \
-           (0 <= x + dx < grid.shape[0] and 0 <= y + 1 < grid.shape[1] and grid[x + dx][y + 1] == 0):
-            return node
-    elif dy != 0 and dx == 0:
-        if (0 <= x - 1 < grid.shape[0] and 0 <= y + dy < grid.shape[1] and grid[x - 1][y + dy] == 0) or \
-           (0 <= x + 1 < grid.shape[0] and 0 <= y + dy < grid.shape[1] and grid[x + 1][y + dy] == 0):
-            return node
-
-    # Diagonal jumps
-    if dx != 0 and dy != 0:
-        if (0 <= x - dx < grid.shape[0] and 0 <= y + dy < grid.shape[1] and grid[x - dx][y + dy] == 0) and \
-           (0 <= x + dx < grid.shape[0] and 0 <= y - dy < grid.shape[1] and grid[x + dx][y - dy] == 0):
-            return node
-        if jump(grid, Node(x + dx, y), node, goal) or jump(grid, Node(x, y + dy), node, goal):
-            return node
-
-    # Continue jumping in the same direction
-    if 0 <= x + dx < grid.shape[0] and 0 <= y + dy < grid.shape[1]:
-        return jump(grid, Node(x + dx, y + dy), node, goal)
-    
-    return None
-
-def identify_successors(grid, node, goal):
-    successors = []
-    neighbors = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, -1), (1, -1), (-1, 1)]
-    
-    for direction in neighbors:
-        next_node = Node(node.x + direction[0], node.y + direction[1])
-        jump_point = jump(grid, next_node, node, goal)
-        if jump_point:
-            successors.append(jump_point)
-    
-    return successors
-
-def jps(grid, start, goal):
+def a_star(grid, start, goal):
     open_list = []
     closed_list = set()
     open_dict = {}  # For visualizing nodes in open list
@@ -95,7 +47,7 @@ def jps(grid, start, goal):
     
     while open_list:
         _, current_node = heapq.heappop(open_list)
-        if (current_node.x, current_node.y) == (goal.x, goal.y):
+        if current_node.x == goal.x and current_node.y == goal.y:
             path = []
             while current_node:
                 path.append((current_node.x, current_node.y))
@@ -105,21 +57,24 @@ def jps(grid, start, goal):
         closed_list.add((current_node.x, current_node.y))
         closed_dict[(current_node.x, current_node.y)] = True  # Mark node in closed list
 
-        successors = identify_successors(grid, current_node, goal)
-        for successor in successors:
-            if (successor.x, successor.y) in closed_list:
-                continue
-            successor.g = current_node.g + 1
-            successor.h = heuristic(successor, goal)
-            successor.f = successor.g + successor.h
+        neighbors = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        for n in neighbors:
+            neighbor_x, neighbor_y = current_node.x + n[0], current_node.y + n[1]
+            if 0 <= neighbor_x < grid.shape[0] and 0 <= neighbor_y < grid.shape[1] and grid[neighbor_x][neighbor_y] == 0:
+                neighbor_node = Node(neighbor_x, neighbor_y, current_node)
+                if (neighbor_x, neighbor_y) in closed_list:
+                    continue
+                neighbor_node.g = current_node.g + 1
+                neighbor_node.h = heuristic(neighbor_node, goal)
+                neighbor_node.f = neighbor_node.g + neighbor_node.h
 
-            if (successor.x, successor.y) not in open_dict:
-                heapq.heappush(open_list, (successor.f, successor))
-                open_dict[(successor.x, successor.y)] = True  # Mark node in open list
+                if (neighbor_x, neighbor_y) not in open_dict:
+                    heapq.heappush(open_list, (neighbor_node.f, neighbor_node))
+                    open_dict[(neighbor_x, neighbor_y)] = True  # Mark node in open list
 
         # Adding delay of 0.5 seconds between iterations
-        # pygame.time.delay(50)
-        visualize_search(open_dict, closed_dict)
+        pygame.time.delay(50)  
+        visualize_search(open_dict, closed_dict)  # Visualize open and closed nodes
         draw_grid()
         draw_obstacles(grid)
         pygame.display.flip()  # Update display after each iteration
@@ -167,8 +122,8 @@ def main():
     start = Node(0, 0)
     goal = Node(ROWS - 1, COLS - 1)
 
-    # Find path using JPS and get visualization data
-    path, open_dict, closed_dict = jps(grid, start, goal)
+    # Find path using A* and get visualization data
+    path, open_dict, closed_dict = a_star(grid, start, goal)
     current_step = 0
     path_found = False
 
@@ -188,21 +143,26 @@ def main():
 
         # Start moving the character once the path is fully drawn
         if path_found:
+            # Keep drawing the path while the character moves
             draw_path(path)
             pygame.draw.rect(screen, RED, (goal.y * TILE_SIZE, goal.x * TILE_SIZE, TILE_SIZE, TILE_SIZE))  # Goal
             if current_step < len(path):
                 # Draw the character moving on the green path
                 pygame.draw.rect(screen, BLUE, (path[current_step][1] * TILE_SIZE, path[current_step][0] * TILE_SIZE, TILE_SIZE, TILE_SIZE))
                 current_step += 1
-            else:
-                current_step = 0  # Reset step count when path is completed
-
-        pygame.display.flip()
-        clock.tick(10)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+
+        pygame.display.flip()
+
+        # Wait for a moment after visualizing the search, then show the path
+        if not path_found:
+            pygame.time.wait(2000)  # Wait for 2 seconds after visualizing search
+            path_found = True  # Show the path, then start the movement
+        else:
+            clock.tick(5)  # Speed of movement after path found
 
     pygame.quit()
 
