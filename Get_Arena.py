@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import concurrent.futures
 
 # Fungsi untuk melakukan threshold dan mengubah gambar menjadi biner
 def threshold_image(image):
@@ -9,8 +10,10 @@ def threshold_image(image):
 
 # Fungsi untuk mendeteksi area kertas dan memotongnya
 def detect_and_crop_paper(binary_image):
-    # Temukan kontur dari gambar biner
     contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    if len(contours) == 0:
+        return None  # Jika tidak ada kontur ditemukan, kembalikan None
 
     # Asumsikan kontur terbesar adalah kertas
     contour = max(contours, key=cv2.contourArea)
@@ -27,12 +30,10 @@ def detect_and_crop_paper(binary_image):
 
 # Fungsi untuk meluruskan area kertas
 def straighten_paper(contour, paper_area):
-    # Mendapatkan 4 titik sudut dari kontur
     epsilon = 0.02 * cv2.arcLength(contour, True)
     approx = cv2.approxPolyDP(contour, epsilon, True)
 
     if len(approx) == 4:
-        # Mengurutkan titik-titik sudut
         points = approx.reshape(4, 2)
         rect = np.zeros((4, 2), dtype="float32")
 
@@ -66,38 +67,51 @@ def straighten_paper(contour, paper_area):
 
 # Fungsi untuk melakukan downsampling
 def downsample_image(image, scale):
-    # Downsample dengan pengambilan setiap `scale` pixel
     downsampled = image[::scale, ::scale]
     return downsampled
 
 def main():
-    # Baca gambar arena
-    image = cv2.imread('image.png')  # Ganti dengan path gambar Anda
+    # Inisialisasi webcam
+    cap = cv2.VideoCapture(0)
 
-    if image is None:
-        print("Gambar tidak ditemukan. Periksa path gambar.")
+    if not cap.isOpened():
+        print("Webcam tidak dapat diakses.")
         return
 
-    # Lakukan threshold untuk mengubah gambar menjadi biner
-    binary_image = threshold_image(image)
+    while True:
+        # Baca frame dari webcam
+        ret, frame = cap.read()
+        if not ret:
+            print("Gagal menangkap frame dari webcam.")
+            break
 
-    # Lakukan downsampling untuk mendapatkan resolusi 1:20
-    scale = 20
-    downsampled_image = downsample_image(binary_image, scale)
+        # Lakukan threshold untuk mengubah gambar menjadi biner
+        binary_image = threshold_image(frame)
 
-    # Dapatkan area kertas dan potong
-    straightened_paper_area = detect_and_crop_paper(downsampled_image)
+        # Lakukan downsampling untuk mendapatkan resolusi 1:20
+        scale = 20
+        downsampled_image = downsample_image(binary_image, scale)
 
-    # Tampilkan gambar biner dan area kertas yang sudah dipotong dan diluruskan
-    cv2.imshow("Binary Image", binary_image)
-    cv2.imshow("Straightened Paper Area", straightened_paper_area)
+        # Menggunakan multithreading untuk mendeteksi dan memotong area kertas
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(detect_and_crop_paper, downsampled_image)
+            straightened_paper_area = future.result()
 
-    # Print nilai setiap pixel dalam bentuk representasi biner
-    print("Nilai setiap pixel dalam representasi biner:")
-    for row in straightened_paper_area:
-        print(' '.join('1' if pixel == 255 else '0' for pixel in row))
+        # Tampilkan gambar biner
+        cv2.imshow("Binary Image", binary_image)
 
-    cv2.waitKey(0)
+        # Tampilkan area kertas yang sudah dipotong dan diluruskan
+        if straightened_paper_area is not None:
+            cv2.imshow("Straightened Paper Area", straightened_paper_area)
+        else:
+            cv2.imshow("Straightened Paper Area", np.zeros_like(frame))  # Tampilkan gambar hitam jika tidak ada area yang terdeteksi
+
+        # Tekan 'q' untuk keluar dari loop
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # Lepaskan semua sumber daya
+    cap.release()
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
