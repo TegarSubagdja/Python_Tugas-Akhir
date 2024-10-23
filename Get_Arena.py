@@ -116,7 +116,6 @@ def process_document(image_path, scale_factor=0.5, visualize=True):
         cv2.imshow('Binary Image', binary)
         cv2.imshow('Detected Contours', img_with_contours)
         cv2.imshow('Straightened Document', straightened)
-        print('kita bedakan disini')
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     
