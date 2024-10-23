@@ -1,118 +1,131 @@
 import cv2
 import numpy as np
-import concurrent.futures
 
-# Fungsi untuk melakukan threshold dan mengubah gambar menjadi biner
-def threshold_image(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, binary = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
+def load_image(image_path):
+    """Load image from the specified path."""
+    img = cv2.imread(image_path)
+    if img is None:
+        raise ValueError("Could not load image from path")
+    return img
+
+def convert_to_binary(img):
+    """Convert image to binary using adaptive thresholding."""
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # Apply Gaussian blur to reduce noise
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    # Apply adaptive thresholding
+    binary = cv2.adaptiveThreshold(
+        blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+        cv2.THRESH_BINARY, 11, 2
+    )
     return binary
 
-# Fungsi untuk mendeteksi area kertas dan memotongnya
-def detect_and_crop_paper(binary_image):
-    contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+def detect_contours(binary):
+    """Detect and return the largest contour (assumed to be the paper)."""
+    contours, _ = cv2.findContours(
+        binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
     
-    if len(contours) == 0:
-        return None  # Jika tidak ada kontur ditemukan, kembalikan None
+    if not contours:
+        raise ValueError("No contours found in image")
+        
+    # Find largest contour by area
+    largest_contour = max(contours, key=cv2.contourArea)
+    return largest_contour
 
-    # Asumsikan kontur terbesar adalah kertas
-    contour = max(contours, key=cv2.contourArea)
-
-    # Buat mask untuk area kertas
-    mask = np.zeros_like(binary_image)
-    cv2.drawContours(mask, [contour], -1, (255), thickness=cv2.FILLED)
-
-    # Potong area kertas dari gambar biner
-    paper_area = cv2.bitwise_and(binary_image, mask)
-
-    # Luruskan area kertas
-    return straighten_paper(contour, paper_area)
-
-# Fungsi untuk meluruskan area kertas
-def straighten_paper(contour, paper_area):
+def get_corners(contour):
+    """Approximate contour to get corner points."""
     epsilon = 0.02 * cv2.arcLength(contour, True)
     approx = cv2.approxPolyDP(contour, epsilon, True)
+    
+    if len(approx) != 4:
+        raise ValueError("Could not find exactly 4 corners")
+        
+    # Convert to more usable format
+    corners = np.float32([point[0] for point in approx])
+    
+    # Sort corners: top-left, top-right, bottom-right, bottom-left
+    sum_pts = corners.sum(axis=1)
+    diff_pts = np.diff(corners, axis=1)
+    
+    ordered_corners = np.zeros((4, 2), dtype=np.float32)
+    ordered_corners[0] = corners[np.argmin(sum_pts)]    # Top-left
+    ordered_corners[1] = corners[np.argmin(diff_pts)]   # Top-right
+    ordered_corners[2] = corners[np.argmax(sum_pts)]    # Bottom-right
+    ordered_corners[3] = corners[np.argmax(diff_pts)]   # Bottom-left
+    
+    return ordered_corners
 
-    if len(approx) == 4:
-        points = approx.reshape(4, 2)
-        rect = np.zeros((4, 2), dtype="float32")
+def straighten_paper(img, corners):
+    """Apply perspective transform to straighten the paper."""
+    # Calculate width and height for the new image
+    width_1 = np.sqrt(((corners[1][0] - corners[0][0]) ** 2) + 
+                      ((corners[1][1] - corners[0][1]) ** 2))
+    width_2 = np.sqrt(((corners[2][0] - corners[3][0]) ** 2) + 
+                      ((corners[2][1] - corners[3][1]) ** 2))
+    max_width = max(int(width_1), int(width_2))
+    
+    height_1 = np.sqrt(((corners[3][0] - corners[0][0]) ** 2) + 
+                       ((corners[3][1] - corners[0][1]) ** 2))
+    height_2 = np.sqrt(((corners[2][0] - corners[1][0]) ** 2) + 
+                       ((corners[2][1] - corners[1][1]) ** 2))
+    max_height = max(int(height_1), int(height_2))
+    
+    # Define destination points for transform
+    dst_points = np.array([
+        [0, 0],
+        [max_width - 1, 0],
+        [max_width - 1, max_height - 1],
+        [0, max_height - 1]
+    ], dtype=np.float32)
+    
+    # Calculate and apply perspective transform
+    matrix = cv2.getPerspectiveTransform(corners, dst_points)
+    straightened = cv2.warpPerspective(img, matrix, (max_width, max_height))
+    
+    return straightened
 
-        s = points.sum(axis=1)
-        rect[0] = points[np.argmin(s)]  # Kiri atas
-        rect[2] = points[np.argmax(s)]  # Kanan bawah
+def downsample_image(img, scale_factor):
+    """Downsample image by the specified scale factor."""
+    width = int(img.shape[1] * scale_factor)
+    height = int(img.shape[0] * scale_factor)
+    return cv2.resize(img, (width, height))
 
-        diff = np.diff(points, axis=1)
-        rect[1] = points[np.argmin(diff)]  # Kanan atas
-        rect[3] = points[np.argmax(diff)]  # Kiri bawah
-
-        # Mendapatkan ukuran baru
-        widthA = np.linalg.norm(rect[1] - rect[0])
-        widthB = np.linalg.norm(rect[2] - rect[3])
-        maxWidth = max(int(widthA), int(widthB))
-
-        heightA = np.linalg.norm(rect[3] - rect[0])
-        heightB = np.linalg.norm(rect[2] - rect[1])
-        maxHeight = max(int(heightA), int(heightB))
-
-        # Menentukan titik tujuan
-        dst = np.array([[0, 0], [maxWidth - 1, 0], [maxWidth - 1, maxHeight - 1], [0, maxHeight - 1]], dtype="float32")
-
-        # Melakukan perspektif transformasi
-        M = cv2.getPerspectiveTransform(rect, dst)
-        straightened = cv2.warpPerspective(paper_area, M, (maxWidth, maxHeight))
-
-        return straightened
-
-    return paper_area  # Jika tidak ada 4 sudut, kembalikan area kertas asli
-
-# Fungsi untuk melakukan downsampling
-def downsample_image(image, scale):
-    downsampled = image[::scale, ::scale]
-    return downsampled
-
-def main():
-    # Inisialisasi webcam
-    cap = cv2.VideoCapture(0)
-
-    if not cap.isOpened():
-        print("Webcam tidak dapat diakses.")
-        return
-
-    while True:
-        # Baca frame dari webcam
-        ret, frame = cap.read()
-        if not ret:
-            print("Gagal menangkap frame dari webcam.")
-            break
-
-        # Lakukan threshold untuk mengubah gambar menjadi biner
-        binary_image = threshold_image(frame)
-
-        # Lakukan downsampling untuk mendapatkan resolusi 1:20
-        scale = 20
-        downsampled_image = downsample_image(binary_image, scale)
-
-        # Menggunakan multithreading untuk mendeteksi dan memotong area kertas
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(detect_and_crop_paper, downsampled_image)
-            straightened_paper_area = future.result()
-
-        # Tampilkan gambar biner
-        cv2.imshow("Binary Image", binary_image)
-
-        # Tampilkan area kertas yang sudah dipotong dan diluruskan
-        if straightened_paper_area is not None:
-            cv2.imshow("Straightened Paper Area", straightened_paper_area)
-        else:
-            cv2.imshow("Straightened Paper Area", np.zeros_like(frame))  # Tampilkan gambar hitam jika tidak ada area yang terdeteksi
-
-        # Tekan 'q' untuk keluar dari loop
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    # Lepaskan semua sumber daya
-    cap.release()
-    cv2.destroyAllWindows()
+def process_document(image_path, scale_factor=0.5, visualize=True):
+    """Main function to process the document image."""
+    # Load and process image
+    original = load_image(image_path)
+    binary = convert_to_binary(original)
+    largest_contour = detect_contours(binary)
+    corners = get_corners(largest_contour)
+    straightened = straighten_paper(original, corners)
+    
+    # Downsample if requested
+    if scale_factor != 1.0:
+        straightened = downsample_image(straightened, scale_factor)
+    
+    # Visualize results if requested
+    if visualize:
+        # Draw contour on original image
+        img_with_contours = original.copy()
+        cv2.drawContours(img_with_contours, [largest_contour], -1, (0, 255, 0), 2)
+        
+        # Create visualization
+        cv2.imshow('Original Image', original)
+        cv2.imshow('Binary Image', binary)
+        cv2.imshow('Detected Contours', img_with_contours)
+        cv2.imshow('Straightened Document', straightened)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    
+    return straightened
 
 if __name__ == "__main__":
-    main()
+    # Example usage
+    image_path = "image.png"  # Replace with actual image path
+    try:
+        result = process_document(image_path)
+        print("\nBinary representation of the processed document:")
+    except Exception as e:
+        print(f"Error processing document: {str(e)}")
