@@ -10,10 +10,11 @@ def load_image(image_path):
 
 def convert_to_binary(img):
     """Convert image to binary using adaptive thresholding."""
-    # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # Convert to grayscale if needed
+    if len(img.shape) == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # Apply Gaussian blur to reduce noise
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    blurred = cv2.GaussianBlur(img, (5, 5), 0)
     # Apply adaptive thresholding
     binary = cv2.adaptiveThreshold(
         blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
@@ -30,7 +31,6 @@ def detect_contours(binary):
     if not contours:
         raise ValueError("No contours found in image")
         
-    # Find largest contour by area
     largest_contour = max(contours, key=cv2.contourArea)
     return largest_contour
 
@@ -42,10 +42,9 @@ def get_corners(contour):
     if len(approx) != 4:
         raise ValueError("Could not find exactly 4 corners")
         
-    # Convert to more usable format
     corners = np.float32([point[0] for point in approx])
     
-    # Sort corners: top-left, top-right, bottom-right, bottom-left
+    # Sort corners
     sum_pts = corners.sum(axis=1)
     diff_pts = np.diff(corners, axis=1)
     
@@ -59,7 +58,6 @@ def get_corners(contour):
 
 def straighten_paper(img, corners):
     """Apply perspective transform to straighten the paper."""
-    # Calculate width and height for the new image
     width_1 = np.sqrt(((corners[1][0] - corners[0][0]) ** 2) + 
                       ((corners[1][1] - corners[0][1]) ** 2))
     width_2 = np.sqrt(((corners[2][0] - corners[3][0]) ** 2) + 
@@ -72,7 +70,6 @@ def straighten_paper(img, corners):
                        ((corners[2][1] - corners[1][1]) ** 2))
     max_height = max(int(height_1), int(height_2))
     
-    # Define destination points for transform
     dst_points = np.array([
         [0, 0],
         [max_width - 1, 0],
@@ -80,52 +77,91 @@ def straighten_paper(img, corners):
         [0, max_height - 1]
     ], dtype=np.float32)
     
-    # Calculate and apply perspective transform
     matrix = cv2.getPerspectiveTransform(corners, dst_points)
     straightened = cv2.warpPerspective(img, matrix, (max_width, max_height))
     
     return straightened
 
-def downsample_image(img, scale_factor):
-    """Downsample image by the specified scale factor."""
-    width = int(img.shape[1] * scale_factor)
-    height = int(img.shape[0] * scale_factor)
-    return cv2.resize(img, (width, height))
+def downsample_image(img, target_ratio=10):
+    """
+    Downsample image by a target ratio (e.g., 1:10).
+    Returns both the downsampled image and its binary version.
+    """
+    scale_factor = 1.0 / target_ratio
+    new_width = int(img.shape[1] * scale_factor)
+    new_height = int(img.shape[0] * scale_factor)
+    
+    # Ensure minimum dimensions
+    new_width = max(new_width, 1)
+    new_height = max(new_height, 1)
+    
+    # Downsample using INTER_AREA for better quality
+    downsampled = cv2.resize(img, (new_width, new_height), 
+                            interpolation=cv2.INTER_AREA)
+    
+    # Convert downsampled image to binary
+    binary_downsampled = convert_to_binary(downsampled)
+    
+    print(f"\nDownsampling Results:")
+    print(f"Original size: {img.shape[1]}x{img.shape[0]}")
+    print(f"Downsampled size: {downsampled.shape[1]}x{downsampled.shape[0]}")
+    print(f"Actual ratio achieved: 1:{img.shape[1]/downsampled.shape[1]:.2f}")
+    
+    return downsampled, binary_downsampled
 
-def process_document(image_path, scale_factor=0.5, visualize=True):
-    """Main function to process the document image."""
+def print_binary_matrix(binary_img):
+    """
+    Print binary image as a matrix of 1s and 0s.
+    """
+    # Ensure we have a binary image (0s and 1s)
+    binary = np.where(binary_img > 128, 1, 0)
+    
+    print(f"\nBinary Matrix ({binary.shape[0]}x{binary.shape[1]}):")
+    print("   " + "".join([f"{i:3}" for i in range(binary.shape[1])]))  # Column numbers
+    for i, row in enumerate(binary):
+        print(f"{i:2} " + " ".join(map(str, row)))  # Row number + data
+
+def process_document(image_path, target_ratio=10, visualize=True):
+    """
+    Process document image and return binary representation of downsampled image.
+    """
     # Load and process image
     original = load_image(image_path)
-    binary = convert_to_binary(original)
-    largest_contour = detect_contours(binary)
+    initial_binary = convert_to_binary(original)
+    largest_contour = detect_contours(initial_binary)
     corners = get_corners(largest_contour)
     straightened = straighten_paper(original, corners)
     
-    # Downsample if requested
-    if scale_factor != 1.0:
-        straightened = downsample_image(straightened, scale_factor)
+    # Downsample and get binary version
+    downsampled, binary_downsampled = downsample_image(straightened, target_ratio)
     
     # Visualize results if requested
     if visualize:
-        # Draw contour on original image
         img_with_contours = original.copy()
         cv2.drawContours(img_with_contours, [largest_contour], -1, (0, 255, 0), 2)
         
-        # Create visualization
-        cv2.imshow('Original Image', original)
-        cv2.imshow('Binary Image', binary)
+        cv2.imshow('Original', original)
+        cv2.imshow('Initial Binary', initial_binary)
         cv2.imshow('Detected Contours', img_with_contours)
-        cv2.imshow('Straightened Document', straightened)
+        cv2.imshow('Straightened', straightened)
+        cv2.imshow('Downsampled', downsampled)
+        cv2.imshow('Final Binary', binary_downsampled)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     
-    return straightened
+    return binary_downsampled
 
 if __name__ == "__main__":
     # Example usage
     image_path = "image.png"  # Replace with actual image path
+    target_ratio = 10  # For 1:10 ratio
+    
     try:
-        result = process_document(image_path)
-        print("\nBinary representation of the processed document:")
+        # Process document and get binary result
+        binary_result = process_document(image_path, target_ratio=target_ratio)
+        
+        # Print binary matrix with row and column numbers
+        print_binary_matrix(binary_result)
+        
     except Exception as e:
         print(f"Error processing document: {str(e)}")
