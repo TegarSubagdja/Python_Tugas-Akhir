@@ -1,0 +1,98 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.8.0">
+  <diagram name="Page-1" id="TMOSN73qNJDvZA6bzIN2">
+    <mxGraphModel dx="607" dy="323" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="quXEB1Ezo4We6kWbLJkp-2" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;perimeterSpacing=0;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="200" y="160" width="110" height="110" as="geometry" />
+        </mxCell>
+        <UserObject label="Motor DC" link="https://shopee.co.id/MOTOR-DC-GEARBOX-1-48-DUAL-SHAFT-FOR-SMART-CHASSIS-4WD-2WD-i.62956347.21469364800?sp_atk=fa802440-d07b-4f00-889a-fde96a8e81ad&amp;xptdk=fa802440-d07b-4f00-889a-fde96a8e81ad" linkTarget="_blank" id="quXEB1Ezo4We6kWbLJkp-3">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFF00;fontSize=8;verticalAlign=bottom;" parent="1" vertex="1">
+            <mxGeometry x="220" y="237" width="70" height="20" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Motor DC" link="https://shopee.co.id/MOTOR-DC-GEARBOX-1-48-DUAL-SHAFT-FOR-SMART-CHASSIS-4WD-2WD-i.62956347.21469364800?sp_atk=fa802440-d07b-4f00-889a-fde96a8e81ad&amp;xptdk=fa802440-d07b-4f00-889a-fde96a8e81ad" linkTarget="_blank" id="quXEB1Ezo4We6kWbLJkp-4">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFF33;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="220" y="174" width="70" height="20" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" link="https://shopee.co.id/RODA-BAN-N20-MOTOR-DC-GEARBOX-WHEEL-TYRE-SMART-CAR-ARDUINO-RASPBERRY-i.62956347.15799672577?sp_atk=07e98d32-1057-4200-bddd-d99823c9c71a&amp;xptdk=07e98d32-1057-4200-bddd-d99823c9c71a" linkTarget="_blank" id="quXEB1Ezo4We6kWbLJkp-5">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;rotation=90;fillColor=#666666;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="215" y="138" width="20" height="46" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="quXEB1Ezo4We6kWbLJkp-6" value="" style="rounded=1;whiteSpace=wrap;html=1;rotation=90;fillColor=#666666;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="215" y="248" width="20" height="46" as="geometry" />
+        </mxCell>
+        <UserObject label="Batre" link="https://shopee.co.id/KOTAK-BATERAI-18650-BATTERY-HOLDER-2S-SERI-7.4V-WITH-JACK-DC-MALE-i.62956347.21710745185?sp_atk=783cca00-1194-4f86-b727-19421f335aaa&amp;xptdk=783cca00-1194-4f86-b727-19421f335aaa" linkTarget="_blank" id="quXEB1Ezo4We6kWbLJkp-7">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;rotation=90;fillColor=#6666FF;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="235" y="180.5" width="40" height="70" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" link="https://shopee.co.id/STEEL-BALL-UNIVERSAL-W420-FOR-SMART-CAR-CHASSIS-i.62956347.16821235416?sp_atk=6f1a83ce-7568-4f16-883f-2c11af09b593&amp;xptdk=6f1a83ce-7568-4f16-883f-2c11af09b593" linkTarget="_blank" id="quXEB1Ezo4We6kWbLJkp-10">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="293" y="208.5" width="15" height="15" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" link="https://shopee.co.id/STEEL-BALL-UNIVERSAL-W420-FOR-SMART-CAR-CHASSIS-i.62956347.16821235416?sp_atk=6f1a83ce-7568-4f16-883f-2c11af09b593&amp;xptdk=6f1a83ce-7568-4f16-883f-2c11af09b593" linkTarget="_blank" id="quXEB1Ezo4We6kWbLJkp-11">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="202" y="208.5" width="15" height="15" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="quXEB1Ezo4We6kWbLJkp-13" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;perimeterSpacing=0;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="340" y="161" width="110" height="110" as="geometry" />
+        </mxCell>
+        <UserObject label="Stepper Motor" link="https://shopee.co.id/L298N-L298-DUAL-H-BRIDGE-STEPPER-MOTOR-DRIVER-MODULE-i.62956347.1102317673?sp_atk=fc8accb6-e99b-4a55-a26f-cd101cdc4de9&amp;xptdk=fc8accb6-e99b-4a55-a26f-cd101cdc4de9" linkTarget="_blank" id="quXEB1Ezo4We6kWbLJkp-12">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;rotation=90;fillColor=#FF9999;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="355" y="199" width="43" height="43" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="ESP32" link="https://shopee.co.id/ESP32-DOIT-WIFI-BLUETOOTH-IOT-ESP-32S-DEVELOPMENT-BOARD-ESP-32-i.62956347.7287068642?sp_atk=073bc6b6-771a-446e-9819-55d825f25677&amp;xptdk=073bc6b6-771a-446e-9819-55d825f25677" linkTarget="_blank" id="quXEB1Ezo4We6kWbLJkp-14">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;rotation=90;fillColor=#1A1A1A;fontColor=#FFFFFF;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="395" y="207" width="52" height="30" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="quXEB1Ezo4We6kWbLJkp-15" value="NRF24L01" style="rounded=1;whiteSpace=wrap;html=1;rotation=0;fillColor=#1A1A1A;fontColor=#FFFFFF;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="368" y="175" width="50" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="cePk31rJ8D-xv85CPPOA-9" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;perimeterSpacing=0;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="315" y="322" width="110" height="110" as="geometry" />
+        </mxCell>
+        <UserObject label="Motor DC" link="https://shopee.co.id/MOTOR-DC-GEARBOX-1-48-DUAL-SHAFT-FOR-SMART-CHASSIS-4WD-2WD-i.62956347.21469364800?sp_atk=fa802440-d07b-4f00-889a-fde96a8e81ad&amp;xptdk=fa802440-d07b-4f00-889a-fde96a8e81ad" linkTarget="_blank" id="cePk31rJ8D-xv85CPPOA-10">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFF00;fontSize=8;verticalAlign=bottom;" parent="1" vertex="1">
+            <mxGeometry x="368" y="392.5" width="70" height="20" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Motor DC" link="https://shopee.co.id/MOTOR-DC-GEARBOX-1-48-DUAL-SHAFT-FOR-SMART-CHASSIS-4WD-2WD-i.62956347.21469364800?sp_atk=fa802440-d07b-4f00-889a-fde96a8e81ad&amp;xptdk=fa802440-d07b-4f00-889a-fde96a8e81ad" linkTarget="_blank" id="cePk31rJ8D-xv85CPPOA-11">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFF33;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="356" y="333" width="70" height="20" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" link="https://shopee.co.id/RODA-BAN-N20-MOTOR-DC-GEARBOX-WHEEL-TYRE-SMART-CAR-ARDUINO-RASPBERRY-i.62956347.15799672577?sp_atk=07e98d32-1057-4200-bddd-d99823c9c71a&amp;xptdk=07e98d32-1057-4200-bddd-d99823c9c71a" linkTarget="_blank" id="cePk31rJ8D-xv85CPPOA-12">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;rotation=90;fillColor=#666666;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="360" y="296.5" width="20" height="46" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="cePk31rJ8D-xv85CPPOA-13" value="" style="rounded=1;whiteSpace=wrap;html=1;rotation=90;fillColor=#666666;fontSize=8;" parent="1" vertex="1">
+          <mxGeometry x="360" y="412.5" width="20" height="46" as="geometry" />
+        </mxCell>
+        <UserObject label="Batre" link="https://shopee.co.id/KOTAK-BATERAI-18650-BATTERY-HOLDER-2S-SERI-7.4V-WITH-JACK-DC-MALE-i.62956347.21710745185?sp_atk=783cca00-1194-4f86-b727-19421f335aaa&amp;xptdk=783cca00-1194-4f86-b727-19421f335aaa" linkTarget="_blank" id="cePk31rJ8D-xv85CPPOA-14">
+          <mxCell style="rounded=0;whiteSpace=wrap;html=1;rotation=90;fillColor=#6666FF;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="350" y="342.5" width="40" height="70" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" link="https://shopee.co.id/STEEL-BALL-UNIVERSAL-W420-FOR-SMART-CAR-CHASSIS-i.62956347.16821235416?sp_atk=6f1a83ce-7568-4f16-883f-2c11af09b593&amp;xptdk=6f1a83ce-7568-4f16-883f-2c11af09b593" linkTarget="_blank" id="cePk31rJ8D-xv85CPPOA-15">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="408" y="370.5" width="15" height="15" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" link="https://shopee.co.id/STEEL-BALL-UNIVERSAL-W420-FOR-SMART-CAR-CHASSIS-i.62956347.16821235416?sp_atk=6f1a83ce-7568-4f16-883f-2c11af09b593&amp;xptdk=6f1a83ce-7568-4f16-883f-2c11af09b593" linkTarget="_blank" id="cePk31rJ8D-xv85CPPOA-16">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontSize=8;" parent="1" vertex="1">
+            <mxGeometry x="317" y="370.5" width="15" height="15" as="geometry" />
+          </mxCell>
+        </UserObject>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
